@@ -136,8 +136,6 @@ export async function getPathingOptions(coordinates: string[][]) {
         language: "pt",
     })
 
-    console.log("asdasd pathingOptions", JSON.stringify(pathingOptions))
-
     // TODO: Rankear usando parâmetros das API's de BH.
 
     return pathingOptions

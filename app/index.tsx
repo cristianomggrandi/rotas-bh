@@ -4,8 +4,6 @@ import { useState } from "react"
 import { Button, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import { searchWithText } from "../util/services"
 
-const ORSGeocode = new Openrouteservice.Geocode({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
-
 export default function Index() {
     const router = useRouter()
 
@@ -42,7 +40,6 @@ export default function Index() {
                     onPress={async () => {
                         const response = await searchWithText(search)
 
-                        console.log("GEOCODE:", JSON.stringify(response))
                         setSearchOptions(response.features)
                     }}
                     title="Buscar"

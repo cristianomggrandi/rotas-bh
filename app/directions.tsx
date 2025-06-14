@@ -1,11 +1,7 @@
 import { getPathingOptions } from "@/util/services"
 import { useRoute } from "@react-navigation/native"
-import Openrouteservice from "openrouteservice-js"
 import { useEffect, useState } from "react"
 import { FlatList, StyleSheet, Text, View } from "react-native"
-
-const ORSDirections = new Openrouteservice.Directions({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
-const ORSGeocode = new Openrouteservice.Geocode({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
 
 const getCoordinates = (start: string, end: string) => {
     const [startLongitude, startLatitude] = start.split(",")
