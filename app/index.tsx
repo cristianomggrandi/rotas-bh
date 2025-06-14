@@ -1,32 +1,102 @@
-import { Link } from "expo-router"
+import { useRouter } from "expo-router"
+import Openrouteservice from "openrouteservice-js"
 import { useState } from "react"
-import { Pressable, StyleSheet, TextInput, View } from "react-native"
+import { Button, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+
+const ORSGeocode = new Openrouteservice.Geocode({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
 
 export default function Index() {
-    const [startLatitude, setStartLatitude] = useState("-19.901920")
-    const [startLongitude, setStartLongitude] = useState("-43.978613")
-    const [endLatitude, setEndLatitude] = useState("-19.911620")
-    const [endLongitude, setEndLongitude] = useState("-43.931891")
+    const router = useRouter()
+
+    const [search, setSearch] = useState("")
+    const [focusedInput, setFocusedInput] = useState("inicio")
+    const [inicio, setInicio] = useState("")
+    const [inicioCoordinates, setInicioCoordinates] = useState<number[]>()
+    const [fim, setFim] = useState("")
+    const [fimCoordinates, setFimCoordinates] = useState<number[]>()
+    const [searchOptions, setSearchOptions] = useState<any[]>([])
 
     return (
         <View style={styles.page}>
-            <TextInput style={styles.input} value={startLatitude} onChangeText={setStartLatitude} placeholder="Start Latitude" />
-            <TextInput style={styles.input} value={startLongitude} onChangeText={setStartLongitude} placeholder="End Latitude" />
-            <TextInput style={styles.input} value={endLatitude} onChangeText={setEndLatitude} placeholder="Start Longitude" />
-            <TextInput style={styles.input} value={endLongitude} onChangeText={setEndLongitude} placeholder="End Longitude" />
-            <Pressable style={styles.button}>
-                <Link
-                    href={{
-                        pathname: "/directions",
-                        params: {
-                            start: startLongitude + "," + startLatitude,
-                            end: endLongitude + "," + endLatitude,
-                        },
+            {inicio ? <Text>Partida: {inicio}</Text> : null}
+            {fim ? <Text>Destino: {fim}</Text> : null}
+
+            {!fim ? <TextInput style={styles.input} value={search} onChangeText={setSearch} placeholder="" /> : null}
+
+            {inicio && fim ? (
+                <Button
+                    title="Ver rota"
+                    onPress={() => {
+                        router.push({
+                            pathname: "/directions",
+                            params: {
+                                start: inicioCoordinates?.join(","),
+                                end: fimCoordinates?.join(","),
+                            },
+                        })
                     }}
-                >
-                    Buscar direções
-                </Link>
-            </Pressable>
+                />
+            ) : (
+                <Button
+                    onPress={async () => {
+                        const response = await ORSGeocode.geocode({
+                            text: search,
+                        })
+
+                        console.log("GEOCODE:", JSON.stringify(response))
+                        setSearchOptions(response.features)
+                    }}
+                    title="Buscar"
+                />
+            )}
+
+            <Button
+                title="Limpar"
+                onPress={() => {
+                    setSearch("")
+                    setSearchOptions([])
+                    setInicio("")
+                    setFim("")
+                    setFocusedInput("inicio")
+                    setInicioCoordinates(undefined)
+                    setFimCoordinates(undefined)
+                }}
+            />
+
+            <View style={styles.list_container}>
+                <FlatList
+                    data={searchOptions}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                        <Pressable
+                            style={styles.item}
+                            onPress={() => {
+                                switch (focusedInput) {
+                                    case "inicio":
+                                        setInicio(item.properties.label)
+                                        setInicioCoordinates(item.geometry.coordinates)
+
+                                        setFocusedInput("fim")
+                                        break
+
+                                    case "fim":
+                                        setFim(item.properties.label)
+                                        setFimCoordinates(item.geometry.coordinates)
+                                        break
+
+                                    default:
+                                        throw new Error("Erro: focusedInput inválido")
+                                }
+
+                                setSearch("")
+                                setSearchOptions([])
+                            }}
+                        >
+                            <Text style={styles.text}>{item.properties.label}</Text>
+                        </Pressable>
+                    )}
+                />
+            </View>
         </View>
     )
 }
@@ -34,6 +104,7 @@ export default function Index() {
 const styles = StyleSheet.create({
     page: {
         flex: 1,
+        gap: 8,
         justifyContent: "center",
         alignItems: "stretch",
     },
@@ -43,6 +114,13 @@ const styles = StyleSheet.create({
         height: 400,
         backgroundColor: "red",
         width: "auto",
+    },
+    list_container: {
+        flex: 1,
+        marginVertical: 20,
+    },
+    text: {
+        fontSize: 16,
     },
     input: {
         height: 40,
@@ -57,5 +135,10 @@ const styles = StyleSheet.create({
         padding: 12,
         marginInline: 10,
         borderRadius: 4,
+    },
+    item: {
+        padding: 16,
+        borderBottomColor: "#ccc",
+        borderBottomWidth: 1,
     },
 })
