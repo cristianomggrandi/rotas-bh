@@ -1,3 +1,4 @@
+import { getPathingOptions } from "@/util/services"
 import { useRoute } from "@react-navigation/native"
 import Openrouteservice from "openrouteservice-js"
 import { useEffect, useState } from "react"
@@ -23,14 +24,7 @@ export default function Index() {
     const [coordinates] = useState(getCoordinates(start, end))
 
     useEffect(() => {
-        ORSDirections.calculate({
-            coordinates,
-            alternative_routes: { target_count: 3 },
-            profile: "foot-walking",
-            format: "json",
-            api_version: "v2",
-            language: "pt",
-        })
+        getPathingOptions(coordinates)
             .then((teste: any) => {
                 setDirections(teste.routes[0].segments[0].steps.map((step: any) => step.instruction))
             })
