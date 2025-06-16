@@ -1,3 +1,4 @@
+import { Picker } from "@react-native-picker/picker"
 import { useRouter } from "expo-router"
 import { useState } from "react"
 import { Button, FlatList, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native"
@@ -17,6 +18,7 @@ export default function Index() {
     const [priorizarElevacao, setPriorizarElevacao] = useState(false)
     const [priorizarIluminacao, setPriorizarIluminacao] = useState(false)
     const [priorizarPavimentacao, setPriorizarPavimentacao] = useState(false)
+    const [profile, setProfile] = useState("pedestre")
 
     return (
         <View style={styles.page}>
@@ -98,6 +100,15 @@ export default function Index() {
                     />
                 ) : (
                     <View>
+                        <View style={styles.select_container}>
+                            <Text style={styles.select_label}>Selecione seu perfil</Text>
+                            <Picker selectedValue={profile} onValueChange={value => setProfile(value)} style={styles.select_picker}>
+                                <Picker.Item label="Pedestre" value="Pedestre" />
+                                <Picker.Item label="Ciclista" value="Ciclista" />
+                                <Picker.Item label="Cadeirante" value="Cadeirante" />
+                                <Picker.Item label="Personalizado" value="Personalizado" />
+                            </Picker>
+                        </View>
                         <View style={styles.switch_container}>
                             <Text style={styles.switch_label}>Priorizar menor elevação</Text>
                             <Switch value={priorizarElevacao} onValueChange={setPriorizarElevacao} />
@@ -168,4 +179,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#333",
     },
+    select_container: { padding: 20 },
+    select_label: { marginBottom: 10 },
+    select_picker: { width: "100%" },
 })
