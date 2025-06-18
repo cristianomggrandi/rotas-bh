@@ -80,28 +80,49 @@ export async function searchWithText(query: string): Promise<GeocodeReturnType> 
 }
 
 export type PathingReturnType = {
+    type: string
     bbox: Array<number>
-    routes: Array<{
-        summary: {
-            distance: number
-            duration: number
-        }
-        segments: Array<{
-            distance: number
-            duration: number
-            steps: Array<{
+    features: Array<{
+        bbox: Array<number>
+        type: string
+        properties: {
+            ascent: number
+            descent: number
+            segments: Array<{
                 distance: number
                 duration: number
-                type: number
-                instruction: string
-                name: string
-                way_points: Array<number>
-                exit_number?: number
+                steps: Array<{
+                    distance: number
+                    duration: number
+                    type: number
+                    instruction: string
+                    name: string
+                    way_points: Array<number>
+                    exit_number?: number
+                }>
+                ascent: number
+                descent: number
             }>
-        }>
-        bbox: Array<number>
-        geometry: string
-        way_points: Array<number>
+            extras: {
+                steepness: {
+                    values: Array<Array<number>>
+                    summary: Array<{
+                        value: number
+                        distance: number
+                        amount: number
+                    }>
+                }
+            }
+            way_points: Array<number>
+            summary: {
+                distance: number
+                duration: number
+            }
+        }
+        geometry: {
+            coordinates: Array<Array<number>>
+            type: string
+        }
     }>
     metadata: {
         attribution: string
@@ -113,6 +134,8 @@ export type PathingReturnType = {
             profileName: string
             format: string
             language: string
+            elevation: boolean
+            extra_info: Array<string>
             alternative_routes: {
                 target_count: number
             }
@@ -126,17 +149,41 @@ export type PathingReturnType = {
 }
 
 
+
 export async function getPathingOptions(coordinates: string[][]) {
-    const pathingOptions: PathingReturnType = await ORSDirections.calculate({
-        coordinates,
-        alternative_routes: { target_count: 3 },
-        profile: "foot-walking",
-        format: "json",
-        api_version: "v2",
-        language: "pt",
-    })
+    // const pathingOptions: PathingReturnType = await ORSDirections.calculate({
+    //     coordinates,
+    //     alternative_routes: { target_count: 3 },
+    //     profile: "foot-walking",
+    //     format: "json",
+    //     api_version: "v2",
+    //     language: "pt",
+    //     elevation: true
+    // })
 
-    // TODO: Rankear usando parâmetros das API's de BH.
+    const response = await fetch("https://api.openrouteservice.org/v2/directions/foot-walking/geojson",
+        {
+            method: "POST",
+            headers: {
+                Authorization: process.env.EXPO_PUBLIC_ORS_KEY ?? "",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                coordinates,
+                alternative_routes: { target_count: 3 },
+                profile: "foot-walking",
+                format: "json",
+                // api_version: "v2",
+                language: "pt",
+                elevation: true,
+                extra_info: ["steepness"]
+            })
+        }
+    )
 
-    return pathingOptions
+    const data = await response.json()
+
+    // console.log("ELEVATION", JSON.stringify(data))
+
+    return data as PathingReturnType
 }
