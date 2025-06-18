@@ -120,7 +120,7 @@ export type PathingReturnType = {
             }
         }
         geometry: {
-            coordinates: Array<Array<number>>
+            coordinates: Array<[number, number, number]>
             type: string
         }
     }>
