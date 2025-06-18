@@ -1,7 +1,9 @@
 import Openrouteservice from "openrouteservice-js"
 
-const ORSDirections = new Openrouteservice.Directions({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
-const ORSGeocode = new Openrouteservice.Geocode({ api_key: process.env.EXPO_PUBLIC_ORS_KEY })
+const EXPO_PUBLIC_ORS_KEY = "5b3ce3597851110001cf6248100eeb45af874de68b751d11a30d2917"
+
+const ORSDirections = new Openrouteservice.Directions({ api_key: EXPO_PUBLIC_ORS_KEY })
+const ORSGeocode = new Openrouteservice.Geocode({ api_key: EXPO_PUBLIC_ORS_KEY })
 
 type GeocodeReturnType = {
     geocoding: {
@@ -165,7 +167,7 @@ export async function getPathingOptions(coordinates: string[][]) {
         {
             method: "POST",
             headers: {
-                Authorization: process.env.EXPO_PUBLIC_ORS_KEY ?? "",
+                Authorization: EXPO_PUBLIC_ORS_KEY ?? "",
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
